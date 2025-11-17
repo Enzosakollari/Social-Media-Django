@@ -1,0 +1,73 @@
+{% extends "core/base.html" %}
+
+{% block title %}Feed{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Explore</h1>
+
+{% if posts %}
+  <div class="posts-grid">
+    {% for post in posts %}
+      <article class="post-card">
+        <header class="post-header">
+          <div class="avatar-circle">
+            {{ post.author.username|first|upper }}
+          </div>
+          <div class="post-meta">
+            <a href="{% url 'profile' post.author.username %}" class="post-author">
+              {{ post.author.username }}
+            </a>
+            <span class="post-date">
+              {{ post.created_at|date:"M d, Y · H:i" }}
+            </span>
+          </div>
+        </header>
+
+        <div class="post-image-wrapper">
+          <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+        </div>
+
+        {% if post.caption %}
+          <p class="post-caption">{{ post.caption }}</p>
+        {% endif %}
+
+        <div class="post-actions">
+          <form method="post" action="{% url 'toggle_like' post.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn icon-btn">
+              ❤️ Like
+            </button>
+          </form>
+
+          <span class="likes-count">
+            {{ post.likes.count }} like{% if post.likes.count != 1 %}s{% endif %}
+          </span>
+
+          {% if request.user != post.author %}
+            <button
+              type="button"
+              class="btn btn-secondary chat-btn"
+              data-chat-url="{% url 'chat' post.author.username %}">
+              Message
+            </button>
+          {% endif %}
+        </div>
+
+        <div class="post-comments">
+          {% for c in post.comments.all %}
+            <p class="comment-line">
+              <span class="comment-author">{{ c.author.username }}</span>
+              <span class="comment-text">{{ c.text }}</span>
+            </p>
+          {% empty %}
+            <p class="empty-muted">No comments yet</p>
+          {% endfor %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="empty-muted">No posts yet. Be the first to post something.</p>
+{% endif %}
+{% endblock %}
+

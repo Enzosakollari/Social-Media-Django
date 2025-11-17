@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<section class="profile-header">
+  <div class="profile-avatar">
+    {% if profile.avatar %}
+      <img src="{{ profile.avatar.url }}" alt="avatar">
+    {% else %}
+      <div class="avatar-circle avatar-lg">
+        {{ profile_user.username|first|upper }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="profile-info">
+    <h1 class="profile-name">{{ profile_user.username }}</h1>
+    {% if profile.bio %}
+      <p class="profile-bio">{{ profile.bio }}</p>
+    {% endif %}
+    <p class="profile-stats">
+      {{ posts|length }} post{% if posts|length != 1 %}s{% endif %}
+    </p>
+
+    {% if request.user != profile_user %}
+      <button
+        type="button"
+        class="btn btn-secondary chat-btn"
+        data-chat-url="{% url 'chat' profile_user.username %}">
+        Message {{ profile_user.username }}
+      </button>
+    {% endif %}
+  </div>
+</section>
+
+<h2 class="section-title">Photos</h2>
+
+{% if posts %}
+  <div class="profile-grid">
+    {% for post in posts %}
+      <div class="profile-grid-item">
+        <img src="{{ post.image.url }}" alt="" class="profile-grid-image">
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="empty-muted">No posts yet.</p>
+{% endif %}
+{% endblock %}

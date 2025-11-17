@@ -1,0 +1,113 @@
+{% extends "core/base.html" %}
+
+{% block title %}Chat with {{ other.username }}{% endblock %}
+
+{% block content %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<section class="chat-wrapper">
+  <header class="chat-header">
+    <div class="avatar-circle avatar-md">
+      {{ other.username|first|upper }}
+    </div>
+    <div class="chat-header-info">
+      <h1>Chat with {{ other.username }}</h1>
+      <p class="chat-subtitle">Messages are live in real time</p>
+    </div>
+  </header>
+
+  <div id="messages" class="chat-box">
+    {% for m in messages %}
+      <div class="chat-message {% if m.sender == request.user %}mine{% else %}theirs{% endif %}">
+        <div class="chat-bubble">
+          <p class="chat-text">{{ m.text }}</p>
+          <span class="chat-meta">
+            {{ m.sender.username }}
+            · {{ m.created_at|time:"H:i" }}
+          </span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form id="chat-form" class="chat-input-row">
+    <input
+      id="message-input"
+      type="text"
+      placeholder="Type a message..."
+      autocomplete="off"
+      class="chat-input">
+    <button type="submit" class="btn btn-primary">Send</button>
+  </form>
+</section>
+
+<script>
+  const currentUserId = {{ request.user.id }};
+  const currentUsername = "{{ request.user.username }}";
+  const otherUserId = {{ other.id }};
+  const roomName = `chat_${Math.min(currentUserId, otherUserId)}_${Math.max(currentUserId, otherUserId)}`;
+
+  const socket = io("http://localhost:8001");
+  const messagesDiv = document.getElementById("messages");
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("message-input");
+
+  socket.on("connect", () => {
+    socket.emit("join_chat", {
+      current_user_id: currentUserId,
+      other_user_id: otherUserId,
+    });
+  });
+
+  socket.on("new_chat_message", (data) => {
+    if (data.room !== roomName) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "chat-message" + (data.sender_username === currentUsername ? " mine" : " theirs");
+
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble";
+
+    const textP = document.createElement("p");
+    textP.className = "chat-text";
+    textP.textContent = data.text;
+
+    const metaSpan = document.createElement("span");
+    metaSpan.className = "chat-meta";
+    metaSpan.textContent = data.sender_username;
+
+    bubble.appendChild(textP);
+    bubble.appendChild(metaSpan);
+    wrapper.appendChild(bubble);
+    messagesDiv.appendChild(wrapper);
+
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    socket.emit("send_chat_message", {
+      room: roomName,
+      sender_username: currentUsername,
+      text: text,
+    });
+
+    fetch("", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ text: text }),
+    });
+
+    input.value = "";
+  });
+
+  // Scroll to bottom on load
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+
+{% block title %}Conversations{% endblock %}
+
+{% block content %}
+<section class="conversations-wrapper">
+  <h1 class="page-title">Messages</h1>
+
+  {% if conversations %}
+    <div class="conversations-list">
+      {% for conv in conversations %}
+        <a href="{% url 'chat' conv.user.username %}" class="conversation-item">
+          <div class="avatar-circle avatar-md">
+            {{ conv.user.username|first|upper }}
+          </div>
+          <div class="conversation-meta">
+            <div class="conversation-header-line">
+              <span class="conversation-name">{{ conv.user.username }}</span>
+              <span class="conversation-time">
+                {{ conv.last_message.created_at|date:"M d, H:i" }}
+              </span>
+            </div>
+            <div class="conversation-preview">
+              {{ conv.last_message.text|truncatechars:40 }}
+            </div>
+          </div>
+          {% if conv.unread_count > 0 %}
+            <span class="badge-unread">{{ conv.unread_count }}</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty-muted">No conversations yet. Start a chat from someone's profile or a post.</p>
+  {% endif %}
+</section>
+{% endblock %}

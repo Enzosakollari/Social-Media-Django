@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+
+{% block title %}New Post{% endblock %}
+
+{% block content %}
+<h1>Create new post</h1>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <p>
+    <label>Image:</label>
+    <input type="file" name="image" required>
+  </p>
+  <p>
+    <label>Caption:</label><br>
+    <textarea name="caption" rows="3" cols="40"></textarea>
+  </p>
+  <button type="submit">Post</button>
+</form>
+{% endblock %}
