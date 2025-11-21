@@ -11,11 +11,11 @@
       <article class="post-card">
         <header class="post-header">
           <div class="avatar-circle">
-            {{ post.author.username|first|upper }}
+            {{ post.user.username|first|upper }}
           </div>
           <div class="post-meta">
-            <a href="{% url 'profile' post.author.username %}" class="post-author">
-              {{ post.author.username }}
+            <a href="{% url 'profile' post.user.username %}" class="post-author">
+              {{ post.user.username }}
             </a>
             <span class="post-date">
               {{ post.created_at|date:"M d, Y · H:i" }}
@@ -24,7 +24,13 @@
         </header>
 
         <div class="post-image-wrapper">
-          <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+{% if post.is_video %}
+    <video class="post-video" controls preload="metadata">
+        <source src="{{ post.video.url }}" type="video/mp4">
+    </video>
+{% elif post.image %}
+    <img src="{{ post.image.url }}" class="post-image">
+{% endif %}
         </div>
 
         {% if post.caption %}
@@ -43,11 +49,11 @@
             {{ post.likes.count }} like{% if post.likes.count != 1 %}s{% endif %}
           </span>
 
-          {% if request.user != post.author %}
+          {% if request.user != post.user %}
             <button
               type="button"
               class="btn btn-secondary chat-btn"
-              data-chat-url="{% url 'chat' post.author.username %}">
+              data-chat-url="{% url 'chat' post.user.username %}">
               Message
             </button>
           {% endif %}
@@ -70,4 +76,3 @@
   <p class="empty-muted">No posts yet. Be the first to post something.</p>
 {% endif %}
 {% endblock %}
-

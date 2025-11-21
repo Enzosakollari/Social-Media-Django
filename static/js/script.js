@@ -40,3 +40,76 @@ document.querySelectorAll('.post-image').forEach(img => {
     });
   }
 });
+
+// Custom file input handling
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInputs = document.querySelectorAll('.file-input');
+
+  fileInputs.forEach(input => {
+    const fileText = input.parentElement.querySelector('.file-input-text');
+    const fileButton = input.parentElement.querySelector('.file-input-button');
+
+    // Update text when file is selected
+    input.addEventListener('change', () => {
+      if (input.files.length > 0) {
+        fileText.textContent = input.files[0].name;
+      } else {
+        fileText.textContent = 'Choose file';
+      }
+    });
+
+    // Trigger file input when button is clicked
+    if (fileButton) {
+      fileButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        input.click();
+      });
+    }
+  });
+
+  // Live preview for image uploads
+  const avatarInput = document.getElementById('avatar');
+  const bannerInput = document.getElementById('banner');
+
+  if (avatarInput) {
+    avatarInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const preview = document.querySelector('.preview-avatar-img');
+        const avatarCircle = document.querySelector('.profile-preview-avatar .avatar-circle');
+
+        if (preview) {
+          preview.src = URL.createObjectURL(this.files[0]);
+        } else if (avatarCircle) {
+          // Replace avatar circle with image
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(this.files[0]);
+          img.alt = 'Profile avatar';
+          img.className = 'preview-avatar-img';
+
+          avatarCircle.parentNode.replaceChild(img, avatarCircle);
+        }
+      }
+    });
+  }
+
+  if (bannerInput) {
+    bannerInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const preview = document.querySelector('.preview-banner-img');
+        const placeholder = document.querySelector('.preview-banner-placeholder');
+
+        if (preview) {
+          preview.src = URL.createObjectURL(this.files[0]);
+        } else if (placeholder) {
+          // Replace placeholder with image
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(this.files[0]);
+          img.alt = 'Profile banner';
+          img.className = 'preview-banner-img';
+
+          placeholder.parentNode.replaceChild(img, placeholder);
+        }
+      }
+    });
+  }
+});

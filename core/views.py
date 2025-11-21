@@ -30,7 +30,7 @@ def register_view(request):
 @login_required
 def feed_view(request):
     posts = (
-        Post.objects.select_related("author")
+        Post.objects.select_related("user")
         .prefetch_related("likes", "comments")
         .order_by("-created_at")
     )
@@ -52,11 +52,23 @@ def profile_view(request, username):
 @login_required
 def create_post_view(request):
     if request.method == "POST":
-        image = request.FILES.get("image")
-        caption = request.POST.get("caption", "")
-        if image:
-            Post.objects.create(author=request.user, image=image, caption=caption)
+        file_image = request.FILES.get("image")
+        file_video = request.FILES.get("video")
+
+        post = Post(
+            user=request.user,
+            caption=request.POST.get("caption")
+        )
+
+        if file_image:
+            post.image = file_image
+
+        if file_video:
+            post.video = file_video
+
+        post.save()
         return redirect("feed")
+
     return render(request, "core/create_post.html")
 
 
@@ -84,6 +96,30 @@ def chat_view(request, username):
         sender__in=[request.user, other], receiver__in=[request.user, other]
     )
     return render(request, "core/chat.html", {"other": other, "messages": messages})
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+# (these imports you already have, just make sure they exist)
+
+@login_required
+def edit_profile_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        avatar = request.FILES.get("avatar")
+        banner = request.FILES.get("banner")
+        bio = request.POST.get("bio", "")
+
+        if avatar:
+            profile.avatar = avatar
+        if banner:
+            profile.banner = banner
+        profile.bio = bio
+        profile.save()
+        return redirect("profile", username=request.user.username)
+
+    return render(request, "core/edit_profile.html", {"profile": profile})
+
 @login_required
 def conversations_view(request):
     # All messages involving the current user

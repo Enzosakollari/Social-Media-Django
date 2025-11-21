@@ -37,6 +37,8 @@ urlpatterns = [
     path("post/new/", core_views.create_post_view, name="create_post"),
     path("post/<int:post_id>/like/", core_views.toggle_like_view, name="toggle_like"),
     path("chat/<str:username>/", core_views.chat_view, name="chat"),
+    path("settings/profile/", core_views.edit_profile_view, name="edit_profile"),
+
 ]
 
 if settings.DEBUG:

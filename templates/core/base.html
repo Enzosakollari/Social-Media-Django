@@ -12,11 +12,7 @@
 
 <!-- Right-side vertical navbar -->
 <nav class="side-nav">
-  <div class="side-nav-top">
-    <a href="{% url 'feed' %}" class="side-nav-logo" title="SocialApp">
-      <span class="logo-dot"></span>
-    </a>
-  </div>
+  <!-- S button removed as requested -->
 
   {% if request.user.is_authenticated %}
     <div class="side-nav-middle">
@@ -36,9 +32,13 @@
 
       <!-- Profile -->
       <a href="{% url 'profile' request.user.username %}" class="side-nav-item" title="Profile">
-        <svg viewBox="0 0 24 24" class="side-nav-icon">
-          <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4.5V21h14v-2.5C19 16 16 14 12 14z"/>
-        </svg>
+        {% if request.user.profile.avatar %}
+          <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="side-nav-avatar">
+        {% else %}
+          <svg viewBox="0 0 24 24" class="side-nav-icon">
+            <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4.5V21h14v-2.5C19 16 16 14 12 14z"/>
+          </svg>
+        {% endif %}
       </a>
 
       <!-- New Post -->

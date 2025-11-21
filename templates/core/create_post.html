@@ -3,18 +3,44 @@
 {% block title %}New Post{% endblock %}
 
 {% block content %}
-<h1>Create new post</h1>
+<section class="create-post-wrapper">
+  <div class="create-post-card">
+    <h1 class="cp-title">Create a new post</h1>
+    <p class="cp-subtitle">Share a moment with your followers.</p>
 
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  <p>
-    <label>Image:</label>
-    <input type="file" name="image" required>
-  </p>
-  <p>
-    <label>Caption:</label><br>
-    <textarea name="caption" rows="3" cols="40"></textarea>
-  </p>
-  <button type="submit">Post</button>
-</form>
+    <form method="post" enctype="multipart/form-data" class="cp-form">
+      {% csrf_token %}
+
+      <div class="cp-row">
+        <label class="cp-label">Media</label>
+
+        <div class="cp-upload-area">
+          <div class="cp-upload-inner">
+            <p class="cp-upload-text">Drop image or video here</p>
+            <p class="cp-upload-hint">Supported: JPG, PNG, WEBP, MP4, WEBM (~25MB)</p>
+          </div>
+
+          <input type="file" name="image" accept="image/*" class="cp-upload-input">
+          <input type="file" name="video" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="cp-upload-input">
+        </div>
+      </div>
+
+      <div class="cp-row">
+        <label class="cp-label">Caption</label>
+        <textarea
+          name="caption"
+          rows="3"
+          class="cp-textarea"
+          placeholder="Write a short caption..."
+        ></textarea>
+      </div>
+
+      <div class="cp-actions">
+        <button type="submit" class="btn btn-auth-primary cp-submit-btn">
+          Publish post
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
 {% endblock %}

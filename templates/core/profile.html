@@ -3,45 +3,111 @@
 {% block title %}{{ profile_user.username }}{% endblock %}
 
 {% block content %}
-<section class="profile-header">
-  <div class="profile-avatar">
-    {% if profile.avatar %}
-      <img src="{{ profile.avatar.url }}" alt="avatar">
-    {% else %}
-      <div class="avatar-circle avatar-lg">
-        {{ profile_user.username|first|upper }}
-      </div>
-    {% endif %}
+
+<section class="profile-cover">
+  <div class="profile-banner-layer
+              {% if not profile.banner %}profile-banner-fallback{% endif %}"
+       {% if profile.banner %}
+       style="background-image: url('{{ profile.banner.url }}');"
+       {% endif %}>
   </div>
 
-  <div class="profile-info">
-    <h1 class="profile-name">{{ profile_user.username }}</h1>
-    {% if profile.bio %}
-      <p class="profile-bio">{{ profile.bio }}</p>
-    {% endif %}
-    <p class="profile-stats">
-      {{ posts|length }} post{% if posts|length != 1 %}s{% endif %}
-    </p>
+  <div class="profile-cover-inner">
+    <div class="profile-avatar-large">
+      {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="avatar">
+      {% else %}
+        <div class="avatar-circle avatar-xl">
+          {{ profile_user.username|first|upper }}
+        </div>
+      {% endif %}
+    </div>
 
-    {% if request.user != profile_user %}
-      <button
-        type="button"
-        class="btn btn-secondary chat-btn"
-        data-chat-url="{% url 'chat' profile_user.username %}">
-        Message {{ profile_user.username }}
-      </button>
-    {% endif %}
+    <div class="profile-cover-info">
+      <h1 class="profile-name">{{ profile_user.username }}</h1>
+      {% if profile.bio %}
+        <p class="profile-bio">{{ profile.bio }}</p>
+      {% endif %}
+      <p class="profile-stats">
+        {{ posts|length }} post{% if posts|length != 1 %}s{% endif %}
+      </p>
+
+      <div class="profile-actions">
+        {% if request.user == profile_user %}
+          <a href="{% url 'edit_profile' %}" class="btn btn-secondary">
+            Edit profile
+          </a>
+        {% else %}
+          <button
+            type="button"
+            class="btn btn-secondary chat-btn"
+            data-chat-url="{% url 'chat' profile_user.username %}">
+            Message {{ profile_user.username }}
+          </button>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </section>
 
-<h2 class="section-title">Photos</h2>
+<h2 class="section-title">Posts</h2>
 
 {% if posts %}
-  <div class="profile-grid">
+  <div class="posts-grid">
     {% for post in posts %}
-      <div class="profile-grid-item">
-        <img src="{{ post.image.url }}" alt="" class="profile-grid-image">
-      </div>
+      <article class="post-card">
+        <header class="post-header">
+          <div class="avatar-circle">
+            {{ profile_user.username|first|upper }}
+          </div>
+          <div class="post-meta">
+            <a href="{% url 'profile' profile_user.username %}" class="post-author">
+              {{ profile_user.username }}
+            </a>
+            <span class="post-date">
+              {{ post.created_at|date:"M d, Y · H:i" }}
+            </span>
+          </div>
+        </header>
+
+        <div class="post-image-wrapper">
+          {% if post.is_video %}
+            <video class="post-video" controls preload="metadata">
+              <source src="{{ post.video.url }}" type="video/mp4">
+            </video>
+          {% elif post.image %}
+            <img src="{{ post.image.url }}" class="post-image">
+          {% endif %}
+        </div>
+
+        {% if post.caption %}
+          <p class="post-caption">{{ post.caption }}</p>
+        {% endif %}
+
+        <div class="post-actions">
+          <form method="post" action="{% url 'toggle_like' post.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn icon-btn">
+              ❤️ Like
+            </button>
+          </form>
+
+          <span class="likes-count">
+            {{ post.likes.count }} like{% if post.likes.count != 1 %}s{% endif %}
+          </span>
+        </div>
+
+        <div class="post-comments">
+          {% for c in post.comments.all %}
+            <p class="comment-line">
+              <span class="comment-author">{{ c.author.username }}</span>
+              <span class="comment-text">{{ c.text }}</span>
+            </p>
+          {% empty %}
+            <p class="empty-muted">No comments yet</p>
+          {% endfor %}
+        </div>
+      </article>
     {% endfor %}
   </div>
 {% else %}
