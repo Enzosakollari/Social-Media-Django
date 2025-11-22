@@ -3,35 +3,44 @@
 {% block title %}Conversations{% endblock %}
 
 {% block content %}
-<section class="conversations-wrapper">
-  <h1 class="page-title">Messages</h1>
+<div class="instagram-chat-container">
 
-  {% if conversations %}
-    <div class="conversations-list">
-      {% for conv in conversations %}
-        <a href="{% url 'chat' conv.user.username %}" class="conversation-item">
-          <div class="avatar-circle avatar-md">
-            {{ conv.user.username|first|upper }}
-          </div>
-          <div class="conversation-meta">
-            <div class="conversation-header-line">
-              <span class="conversation-name">{{ conv.user.username }}</span>
-              <span class="conversation-time">
-                {{ conv.last_message.created_at|date:"M d, H:i" }}
-              </span>
+  <!-- LEFT: SAME USERS SIDEBAR AS /chat/ -->
+  <div class="chat-sidebar">
+    <h2 class="chat-sidebar-title">Messages</h2>
+
+    <div class="online-users-section">
+      <h3 class="chat-section-title">Users</h3>
+      <div class="online-users-list">
+        {% for user in all_users %}
+          <a href="{% url 'chat' user.username %}" class="online-user-item">
+            <div class="avatar-circle avatar-md">
+              {{ user.username|first|upper }}
             </div>
-            <div class="conversation-preview">
-              {{ conv.last_message.text|truncatechars:40 }}
-            </div>
-          </div>
-          {% if conv.unread_count > 0 %}
-            <span class="badge-unread">{{ conv.unread_count }}</span>
-          {% endif %}
-        </a>
-      {% endfor %}
+            <div class="online-user-name">{{ user.username }}</div>
+          </a>
+        {% empty %}
+          <p class="empty-muted">No other users.</p>
+        {% endfor %}
+      </div>
     </div>
-  {% else %}
-    <p class="empty-muted">No conversations yet. Start a chat from someone's profile or a post.</p>
-  {% endif %}
-</section>
+  </div>
+
+  <!-- RIGHT: EMPTY / INFO PANEL -->
+  <section class="chat-wrapper">
+    <header class="chat-header">
+      <div class="chat-header-info">
+        <h1>Messages</h1>
+        <p class="chat-subtitle">
+          Select a user from the left to start chatting.
+        </p>
+      </div>
+    </header>
+
+    <div class="chat-box" style="display:flex;align-items:center;justify-content:center;opacity:0.25;">
+      <p>No chat selected.</p>
+    </div>
+  </section>
+
+</div>
 {% endblock %}

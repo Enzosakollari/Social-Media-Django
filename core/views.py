@@ -1,13 +1,11 @@
 from django.shortcuts import render
 from django.db.models import Q
-
-
 # Create your views here.
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 
@@ -50,21 +48,24 @@ def profile_view(request, username):
 
 
 @login_required
+@login_required
 def create_post_view(request):
     if request.method == "POST":
-        file_image = request.FILES.get("image")
-        file_video = request.FILES.get("video")
+        media = request.FILES.get("media")          # <-- single field from template
+        caption = request.POST.get("caption", "")
 
         post = Post(
             user=request.user,
-            caption=request.POST.get("caption")
+            caption=caption,
         )
 
-        if file_image:
-            post.image = file_image
+        if media:
+            content_type = (media.content_type or "").lower()
 
-        if file_video:
-            post.video = file_video
+            if content_type.startswith("image/"):
+                post.image = media
+            elif content_type.startswith("video/"):
+                post.video = media
 
         post.save()
         return redirect("feed")
@@ -81,21 +82,41 @@ def toggle_like_view(request, post_id):
     return redirect("feed")
 
 
+from django.contrib.auth.models import User
+from django.db.models import Q
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def chat_view(request, username):
     other = get_object_or_404(User, username=username)
 
+    # Handle new message POST (store in DB)
     if request.method == "POST":
         text = request.POST.get("text", "").strip()
         if text:
             Message.objects.create(sender=request.user, receiver=other, text=text)
         return HttpResponse(status=204)
 
+    # All messages between current user and "other"
     messages = Message.objects.filter(
-        sender__in=[request.user, other], receiver__in=[request.user, other]
+        sender__in=[request.user, other],
+        receiver__in=[request.user, other],
+    ).order_by("created_at")
+
+    # ✅ All users except yourself (no conversations filtering)
+    all_users = User.objects.exclude(id=request.user.id).order_by("username")
+
+    return render(
+        request,
+        "core/chat.html",
+        {
+            "other": other,
+            "messages": messages,
+            "all_users": all_users,
+        },
     )
-    return render(request, "core/chat.html", {"other": other, "messages": messages})
+
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -121,41 +142,28 @@ def edit_profile_view(request):
     return render(request, "core/edit_profile.html", {"profile": profile})
 
 @login_required
-def conversations_view(request):
-    # All messages involving the current user
-    qs = (
-        Message.objects.filter(
-            Q(sender=request.user) | Q(receiver=request.user)
-        )
-        .select_related("sender", "receiver")
-        .order_by("-created_at")
-    )
+def users_list_api(request):
+    users = User.objects.all()
+    data = []
 
-    conversations = {}  # key: other_user_id -> data
-
-    for m in qs:
-        other = m.receiver if m.sender == request.user else m.sender
-        data = conversations.get(other.id)
-        if not data:
-            conversations[other.id] = {
-                "user": other,
-                "last_message": m,
-                "unread_count": 0,
+    for u in users:
+        profile, _ = Profile.objects.get_or_create(user=u)
+        avatar_url = profile.avatar.url if profile.avatar else ""
+        data.append(
+            {
+                "id": u.id,
+                "username": u.username,
+                "avatar_url": avatar_url,
             }
-        # count unread messages where YOU are the receiver
-        if not m.is_read and m.receiver == request.user:
-            conversations[other.id]["unread_count"] += 1
+        )
 
-    # Turn dict into a list (for the template)
-    conversation_list = list(conversations.values())
-
-    # Sort by latest message time (already mostly sorted, but just to be sure)
-    conversation_list.sort(
-        key=lambda c: c["last_message"].created_at, reverse=True
-    )
+    return JsonResponse({"users": data})
+@login_required
+def conversations_view(request):
+    all_users = User.objects.exclude(id=request.user.id).order_by("username")
 
     return render(
         request,
         "core/conversations.html",
-        {"conversations": conversation_list},
+        {"all_users": all_users},
     )

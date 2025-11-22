@@ -3,16 +3,24 @@
 {% block title %}Feed{% endblock %}
 
 {% block content %}
-<h1 class="page-title">Explore</h1>
+<h1 class="page-title page-title-feed">Explore</h1>
 
 {% if posts %}
-  <div class="posts-grid">
+  <div class="posts-grid posts-grid-feed">
     {% for post in posts %}
-      <article class="post-card">
+      <article class="post-card post-card-rounded">
         <header class="post-header">
-          <div class="avatar-circle">
-            {{ post.user.username|first|upper }}
+          <div class="post-avatar">
+            {% if post.user.profile.avatar %}
+              <img src="{{ post.user.profile.avatar.url }}"
+                   alt="{{ post.user.username }}">
+            {% else %}
+              <div class="avatar-circle avatar-md">
+                {{ post.user.username|first|upper }}
+              </div>
+            {% endif %}
           </div>
+
           <div class="post-meta">
             <a href="{% url 'profile' post.user.username %}" class="post-author">
               {{ post.user.username }}
@@ -24,13 +32,13 @@
         </header>
 
         <div class="post-image-wrapper">
-{% if post.is_video %}
-    <video class="post-video" controls preload="metadata">
-        <source src="{{ post.video.url }}" type="video/mp4">
-    </video>
-{% elif post.image %}
-    <img src="{{ post.image.url }}" class="post-image">
-{% endif %}
+          {% if post.is_video %}
+            <video class="post-video" autoplay loop muted playsinline>
+              <source src="{{ post.video.url }}" type="video/mp4">
+            </video>
+          {% elif post.image %}
+            <img src="{{ post.image.url }}" class="post-image">
+          {% endif %}
         </div>
 
         {% if post.caption %}
@@ -59,6 +67,7 @@
           {% endif %}
         </div>
 
+        {# keep comments or remove depending on what you decided #}
         <div class="post-comments">
           {% for c in post.comments.all %}
             <p class="comment-line">

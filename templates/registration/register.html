@@ -1,37 +1,59 @@
 {% extends "core/base.html" %}
+{% load static %}
+
+{% block sidebar %}{% endblock %}  {# Hide sidebar on signup #}
 
 {% block title %}Sign Up{% endblock %}
 
 {% block content %}
-<div class="auth-page">
-  <div class="auth-decor-square auth-decor-square-1"></div>
-  <div class="auth-decor-square auth-decor-square-2"></div>
+<div class="auth-split">
 
-  <div class="auth-card">
-    <h1 class="auth-title">Create your account</h1>
-    <p class="auth-subtitle">Join the community and start posting.</p>
+    <!-- LEFT SIDE: BIG LOGO -->
+    <div class="auth-logo-side">
+        <img src="{% static 'pxlogo.png' %}"
+             alt="Logo"
+             class="auth-big-logo">
+    </div>
 
-    <form method="post" class="auth-form">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+    <!-- RIGHT SIDE: SIGNUP BOX -->
+    <div class="auth-box-side">
+        <div class="auth-card-modern">
 
-      {% for field in form %}
-        <div class="auth-field">
-          {{ field.label_tag }}
-          {{ field }}
-          {% if field.errors %}
-            <div class="auth-error">{{ field.errors|striptags }}</div>
-          {% endif %}
+            <h1 class="auth-title-modern">Create your account</h1>
+            <p class="auth-subtitle-modern">Join the community and start posting.</p>
+
+            <form method="post" class="auth-form-modern">
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                <!-- Username -->
+                {{ form.username.errors }}
+                <label>Username</label>
+                {{ form.username }}
+
+                <!-- Password -->
+                {{ form.password1.errors }}
+                <label>Password</label>
+                {{ form.password1 }}
+
+                <!-- Confirm password -->
+                {{ form.password2.errors }}
+                <label>Confirm Password</label>
+                {{ form.password2 }}
+
+                <button type="submit" class="btn-modern">
+                    Sign up
+                </button>
+            </form>
+
+            <p class="auth-bottom-text">
+                Already have an account?
+                <a href="{% url 'login' %}">Log in</a>
+            </p>
+
         </div>
-      {% endfor %}
+    </div>
 
-      <button type="submit" class="btn btn-auth-primary">Sign up</button>
-    </form>
-
-    <p class="auth-footer-text">
-      Already have an account?
-      <a href="{% url 'login' %}" class="auth-link">Log in</a>
-    </p>
-  </div>
 </div>
 {% endblock %}

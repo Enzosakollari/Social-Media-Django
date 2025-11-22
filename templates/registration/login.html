@@ -1,34 +1,49 @@
 {% extends "core/base.html" %}
+{% load static %}
+
+{% block sidebar %}{% endblock %}  {# Hide sidebar on login #}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="auth-page">
-  <div class="auth-decor-square auth-decor-square-1"></div>
-  <div class="auth-decor-square auth-decor-square-2"></div>
+<div class="auth-split">
 
-  <div class="auth-card">
-    <h1 class="auth-title">Welcome back</h1>
-    <p class="auth-subtitle">Log in to continue sharing your moments.</p>
+    <!-- LEFT SIDE: BIG LOGO -->
+    <div class="auth-logo-side">
+        <img src="{% static 'pxlogo.png' %}"
+             alt="Logo"
+             class="auth-big-logo">
+    </div>
 
-    <form method="post" class="auth-form">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <div class="auth-field">
-        {{ form.username.label_tag }}
-        {{ form.username }}
-      </div>
-      <div class="auth-field">
-        {{ form.password.label_tag }}
-        {{ form.password }}
-      </div>
-      <button type="submit" class="btn btn-auth-primary">Sign in</button>
-    </form>
+    <!-- RIGHT SIDE: LOGIN BOX -->
+    <div class="auth-box-side">
+        <div class="auth-card-modern">
 
-    <p class="auth-footer-text">
-      New here?
-      <a href="{% url 'register' %}" class="auth-link">Create an account</a>
-    </p>
-  </div>
+            <h1 class="auth-title-modern">Welcome back</h1>
+            <p class="auth-subtitle-modern">Log in to continue sharing your moments.</p>
+
+            <form method="post" class="auth-form-modern">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <label>Username</label>
+                {{ form.username }}
+
+                <label>Password</label>
+                {{ form.password }}
+
+                <button type="submit" class="btn-modern">
+                    Sign in
+                </button>
+            </form>
+
+            <p class="auth-bottom-text">
+                New here?
+                <a href="{% url 'register' %}">Create an account</a>
+            </p>
+
+        </div>
+    </div>
+
 </div>
 {% endblock %}

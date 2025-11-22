@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 from core import views as core_views
+from core.views import users_list_api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -38,6 +39,8 @@ urlpatterns = [
     path("post/<int:post_id>/like/", core_views.toggle_like_view, name="toggle_like"),
     path("chat/<str:username>/", core_views.chat_view, name="chat"),
     path("settings/profile/", core_views.edit_profile_view, name="edit_profile"),
+
+    path("api/users/", users_list_api, name="users_list_api"),
 
 ]
 

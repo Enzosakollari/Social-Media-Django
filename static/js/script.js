@@ -1,3 +1,14 @@
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".post-video").forEach(video => {
+        video.muted = true;
+        video.loop = true;
+        video.autoplay = true;
+
+        // Force restart if it didn’t auto-play
+        video.play().catch(() => {});
+    });
+});
+
 // Handle "Message" buttons that redirect to chat views
 document.addEventListener("DOMContentLoaded", () => {
   const chatButtons = document.querySelectorAll(".chat-btn");
