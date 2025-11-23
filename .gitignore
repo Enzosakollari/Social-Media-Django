@@ -1,0 +1,61 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- Virtual environment ----
+venv/
+.venv/
+ENV/
+env/
+
+# ---- Django ----
+*.log
+*.pot
+*.pyc
+*.sqlite3
+db.sqlite3
+
+# ---- Media uploaded by users ----
+media/
+
+# ---- Production collected static ----
+
+# (IMPORTANT)
+# KEEP your development static folder!
+# Do NOT ignore this:
+# static/
+
+# ---- Environment variables ----
+.env
+*.env
+
+# ---- IDE ----
+.vscode/
+.idea/
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- Build artifacts ----
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+
+# ---- Pip ----
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ---- Testing ----
+htmlcov/
+.coverage
+.tox/
+.coverage.*
+.pytest_cache/

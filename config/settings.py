@@ -1,24 +1,28 @@
 # config/settings.py
 from pathlib import Path
 import os
-import os
-DEBUG = os.getenv("DEBUG", "True") == "True"
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: change this to an env var in real production
+# -----------------------------
+# Core security / debug
+# -----------------------------
 SECRET_KEY = "django-insecure-bt7!f#g=!-!e&$75li=n^ma1o-87s)n%-puya379fa5y5vpqke"
 
-# For now: read from env, default True for local dev
+# Locally: DEBUG=True (env var overrides this on Railway)
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-# Railway gives dynamic hostnames, easiest for now:
+# Allow everything for now (simple for Railway)
 ALLOWED_HOSTS = ["*"]
 
-# -------------------------------------------------------------------
+# CSRF trusted origins – IMPORTANT for Railway
+CSRF_TRUSTED_ORIGINS = [
+    "https://social-media-django-production.up.railway.app",
+]
+
+# -----------------------------
 # Apps
-# -------------------------------------------------------------------
+# -----------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -27,12 +31,19 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    "channels",   # you already had this
+    "channels",
     "core",
 ]
 
+# -----------------------------
+# Middleware
+# -----------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+
+    # Whitenoise for static files in production
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -62,9 +73,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-# -------------------------------------------------------------------
+# -----------------------------
 # Database – Railway Postgres
-# -------------------------------------------------------------------
+# -----------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -76,9 +87,9 @@ DATABASES = {
     }
 }
 
-# -------------------------------------------------------------------
+# -----------------------------
 # Password validation
-# -------------------------------------------------------------------
+# -----------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -94,45 +105,48 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# -------------------------------------------------------------------
-# Internationalization
-# -------------------------------------------------------------------
+# -----------------------------
+# I18N / TZ
+# -----------------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# -------------------------------------------------------------------
+# -----------------------------
 # Static & Media
-# -------------------------------------------------------------------
+# -----------------------------
 STATIC_URL = "/static/"
 
-# where your project-level static folder is (CSS, JS, etc.)
+# Your project-level static folder (where css/base.css, js/script.js, pxlogo.png are)
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# where collectstatic will dump files for production
+# Where collectstatic will put built files (used by Railway)
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Whitenoise storage backend for compressed static files
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# -------------------------------------------------------------------
+# -----------------------------
 # Auth redirects
-# -------------------------------------------------------------------
+# -----------------------------
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "feed"
 LOGOUT_REDIRECT_URL = "login"
 
-# -------------------------------------------------------------------
-# Default primary key field type
-# -------------------------------------------------------------------
+# -----------------------------
+# Default PK
+# -----------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# -------------------------------------------------------------------
-# Channels – simple in-memory layer (OK on a single Railway container)
-# -------------------------------------------------------------------
+# -----------------------------
+# Channels
+# -----------------------------
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
