@@ -18,6 +18,8 @@ ALLOWED_HOSTS = ["*"]
 # CSRF trusted origins – IMPORTANT for Railway
 CSRF_TRUSTED_ORIGINS = [
     "https://social-media-django-production.up.railway.app",
+    "https://web-production-df8af.up.railway.app",
+    "https://*.up.railway.app",
 ]
 
 # -----------------------------
